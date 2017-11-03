@@ -24,11 +24,15 @@ const login = (request, response) => {
       return res.status(401).json({ error: 'Wrong username or password' });
     }
 
+    // Store the account information in the session object
+    req.session.account = Account.AccountModel.toAPI(account);
+
     return res.json({ redirect: '/maker' });
   });
 };
 
 const logout = (req, res) => {
+  req.session.destroy(); // Removes a user's session
   res.redirect('/');
 };
 
@@ -40,17 +44,17 @@ const signup = (request, response) => {
   const req = request;
   const res = response;
 
-    // Cast to strings to cover up some security flaws
+  // Cast to strings to cover up some security flaws
   req.body.username = `${req.body.username}`;
   req.body.pass = `${req.body.pass}`;
   req.body.pass2 = `${req.body.pass2}`;
 
-    // Make sure all fields are used
+  // Make sure all fields are used
   if (!req.body.username || !req.body.pass || !req.body.pass2) {
     return res.status(400).json({ error: 'RAWR! All fields are required' });
   }
 
-    // Make sure passwords match
+  // Make sure passwords match
   if (req.body.pass !== req.body.pass2) {
     return res.status(400).json({ error: 'RAWR! Passwords do not match' });
   }
@@ -66,8 +70,12 @@ const signup = (request, response) => {
 
     const savePromise = newAccount.save();
 
-        // Promise
-    savePromise.then(() => res.json({ redirect: '/maker' }));
+    // Promise
+    savePromise.then(() => {
+      // Store the account information in the session object
+      req.session.account = Account.AccountModel.toAPI(newAccount);
+      return res.json({ redirect: '/maker' });
+    });
 
     savePromise.catch((err) => {
       console.log(err);

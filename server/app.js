@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const expressHandlebars = require('express-handlebars');
+const session = require('express-session');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000; // Node server connection
 
@@ -28,6 +29,12 @@ app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
 app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
 app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+  key: 'sessionid', // Rename this from the default "connect.sid"
+  secret: 'Domo Arigato', // Seed for hashing/unique session keys
+  resave: true, // Refresh the key to keep it active
+  saveUninitialized: true, // Always make sessions even when not logged in
+}));
 app.engine('handlebars', expressHandlebars({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
 app.set('views', `${__dirname}/../views/`);
