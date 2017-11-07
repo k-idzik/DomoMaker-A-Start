@@ -67,10 +67,12 @@ app.use(cookieParser());
 
 // Don't respond to users with a bad token
 // They're up to nonsense
-app.use(csrf);
+app.use(csrf()); // Must come after cookieParser and session, but before router
 app.use((err, req, res, next) => {
   // If this isn't tomfoolery
-  if (err.code !== 'EBADCSFTOKEN') { return next(err); }
+  if (err.code !== 'EBADCSRFTOKEN') {
+    return next(err);
+  }
 
   console.log('Missing CSRF token');
   return false;
