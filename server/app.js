@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const expressHandlebars = require('express-handlebars');
 const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const url = require('url');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000; // Node server connection
 
@@ -21,6 +23,19 @@ mongoose.connect(dbURL, (err) => {
   }
 });
 
+// Get the username/password to connect to Redis, or assume this is a local machine
+let redisURL = {
+  hostname: 'localhost',
+  port: 6379,
+};
+
+let redisPASS;
+
+if (process.env.REDISCLOUD_URL) {
+  redisURL = url.parse(process.env.REDISCLOUD_URL);
+  redisPASS = redisURL.auth.split(':')[1];
+}
+
 // Pull in the router
 const router = require('./router.js');
 
@@ -31,6 +46,11 @@ app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   key: 'sessionid', // Rename this from the default "connect.sid"
+  store: new RedisStore({ // Instead of storing in server variables, store in Redis
+    host: redisURL.hostname,
+    port: redisURL.port,
+    pass: redisPASS,
+  }),
   secret: 'Domo Arigato', // Seed for hashing/unique session keys
   resave: true, // Refresh the key to keep it active
   saveUninitialized: true, // Always make sessions even when not logged in
