@@ -2,6 +2,17 @@ const models = require('../models');
 
 const Account = models.Account;
 
+const getToken = (request, response) => {
+  const req = request;
+  const res = response;
+
+  const csrfJSON = {
+    csrfToken: req.csrfToken(),
+  };
+
+  res.json(csrfJSON);
+};
+
 const loginPage = (req, res) => {
   // Add tokens here, where render data is submitted
   res.render('login', { csrfToken: req.csrfToken() });
@@ -35,11 +46,6 @@ const login = (request, response) => {
 const logout = (req, res) => {
   req.session.destroy(); // Removes a user's session
   res.redirect('/');
-};
-
-const signupPage = (req, res) => {
-  // Add tokens here, where render data is submitted
-  res.render('signup', { csrfToken: req.csrfToken() });
 };
 
 const signup = (request, response) => {
@@ -91,8 +97,8 @@ const signup = (request, response) => {
   });
 };
 
+module.exports.getToken = getToken;
 module.exports.loginPage = loginPage;
 module.exports.login = login;
 module.exports.logout = logout;
-module.exports.signupPage = signupPage;
 module.exports.signup = signup;

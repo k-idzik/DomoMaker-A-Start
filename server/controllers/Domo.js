@@ -14,6 +14,20 @@ const makerPage = (req, res) => {
   });
 };
 
+const getDomos = (request, response) => {
+  const req = request;
+  const res = response;
+
+  return Domo.DomoModel.findByOwner(req.session.account._id, (err, docs) => {
+    if (err) {
+      console.log(err);
+      return res.status(400).json({ error: 'An error occurred' });
+    }
+
+    return res.json({ domos: docs });
+  });
+};
+
 const makeDomo = (req, res) => {
   if (!req.body.name || !req.body.age) {
     return res.status(400).json({ error: 'RAWR! Both name and age are required' });
@@ -45,4 +59,5 @@ const makeDomo = (req, res) => {
 };
 
 module.exports.makerPage = makerPage;
+module.exports.getDomos = getDomos;
 module.exports.make = makeDomo;
